@@ -107,6 +107,14 @@ async def claim_transfer(transfer_id: int):
     else:
         raise HTTPException(status_code=500, detail=result.get("error", "Unknown error"))
 
+@app.get("/history")
+async def get_history():
+    try:
+        await cli.gh()
+        return cli.h
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Could not fetch history: {e}")
+
 @app.get("/export_keys")
 async def export_keys():
     return {
