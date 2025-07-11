@@ -49,6 +49,126 @@ $('#copy-modal-btn').click(function() {
   });
 });
 
+function formatTxTime(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return d.toLocaleString();
+}
+function badgeType(type) {
+  if (type === 'in') return '<span class="badge bg-success">IN</span>';
+  if (type === 'out') return '<span class="badge bg-danger">OUT</span>';
+  return `<span class="badge bg-secondary">${type}</span>`;
+}
+function badgeStatus(tx) {
+  if (tx.ok && tx.epoch) return `<span class="badge bg-success">Confirmed</span> <span class="badge bg-info">e${tx.epoch}</span>`;
+  if (tx.ok) return '<span class="badge bg-warning text-dark">Pending</span>';
+  return '<span class="badge bg-secondary">Unknown</span>';
+}
+function decodeMsg(msg) {
+  if (!msg) return '';
+  try {
+    // Try to decode as hex string
+    if (/^[0-9a-fA-F]+$/.test(msg)) {
+      let str = '';
+      for (let i = 0; i < msg.length; i += 2) {
+        str += String.fromCharCode(parseInt(msg.substr(i, 2), 16));
+      }
+      return str;
+    }
+    return msg;
+  } catch { return msg; }
+}
+
+function renderHistoryTable(txs) {
+  console.log('renderHistoryTable called with:', txs);
+  const tbody = $('#history-table tbody');
+  tbody.empty();
+  if (!txs || txs.length === 0) {
+    tbody.append('<tr><td colspan="6" class="text-center text-muted">No transactions found.</td></tr>');
+    return;
+  }
+  txs.forEach((tx, idx) => {
+    const row = $(`
+      <tr>
+        <td>${formatTxTime(tx.time)}</td>
+        <td>${badgeType(tx.type)}</td>
+        <td>${tx.amt}</td>
+        <td><span class="badge bg-light text-dark">${tx.to || ''}</span></td>
+        <td>${badgeStatus(tx)}</td>
+        <td><button class="btn btn-sm btn-outline-info view-tx-btn" data-idx="${idx}">View Details</button></td>
+      </tr>
+    `);
+    tbody.append(row);
+  });
+  console.log('renderHistoryTable finished rendering');
+}
+
+function showTxDetails(tx) {
+  let html = `<div class="mb-2"><b>Hash:</b> <span class="badge bg-secondary">${tx.hash}</span></div>`;
+  html += `<div class="mb-2"><b>Time:</b> ${formatTxTime(tx.time)}</div>`;
+  html += `<div class="mb-2"><b>Type:</b> ${badgeType(tx.type)}</div>`;
+  html += `<div class="mb-2"><b>Amount:</b> <span class="badge bg-dark">${tx.amt}</span></div>`;
+  html += `<div class="mb-2"><b>Address:</b> <span class="badge bg-light text-dark">${tx.to || ''}</span></div>`;
+  html += `<div class="mb-2"><b>Status:</b> ${badgeStatus(tx)}</div>`;
+  html += `<div class="mb-2"><b>Nonce:</b> ${tx.nonce ?? ''}</div>`;
+  html += `<div class="mb-2"><b>Epoch:</b> ${tx.epoch ?? ''}</div>`;
+  if (tx.msg) {
+    html += `<div class="mb-2"><b>Message:</b> <span class="badge bg-info">${decodeMsg(tx.msg)}</span></div>`;
+  }
+  html += `<div class="mb-2"><b>Raw JSON:</b></div><pre><code class="json">${JSON.stringify(tx, null, 2)}</code></pre>`;
+  $('#tx-details-content').html(html);
+  if (window.hljs) $('#tx-details-content code.json').each((i, el) => hljs.highlightElement(el));
+  $('#txDetailsModal').modal('show');
+}
+
+function fetchAndRenderHistory() {
+  console.log('fetchAndRenderHistory called');
+  $('#history-spinner').show();
+  console.log('Spinner shown');
+  $('#history-alert').addClass('d-none').hide();
+  $('#history-table tbody').empty();
+  $.get('/history', function(data) {
+    console.log('Received /history data:', data);
+    renderHistoryTable(data);
+    $('#history-spinner').hide();
+    console.log('Spinner hidden');
+    if (!data || data.length === 0) {
+      $('#history-alert').removeClass('d-none alert-danger').addClass('alert-info').text('No transactions found.').fadeIn(200);
+    }
+  }).fail(function(xhr) {
+    $('#history-spinner').hide();
+    console.log('Error fetching /history:', xhr);
+    $('#history-alert').removeClass('d-none alert-info').addClass('alert-danger').text('Failed to load history: ' + (xhr.responseText || xhr.statusText)).fadeIn(200);
+  });
+}
+
+// On page load, fetch history
+$(document).ready(function() {
+  console.log('Document ready, calling fetchAndRenderHistory');
+  fetchAndRenderHistory();
+});
+// Refresh button
+$('#refresh-history-btn').click(function() {
+  fetchAndRenderHistory();
+});
+// View Details button
+$(document).on('click', '.view-tx-btn', function() {
+  const idx = $(this).data('idx');
+  $.get('/history', function(data) {
+    if (data && data[idx]) showTxDetails(data[idx]);
+  });
+});
+// Copy details in modal
+$('#copy-tx-details-btn').click(function() {
+  const text = $('#tx-details-content').text();
+  navigator.clipboard.writeText(text).then(() => {
+    $(this).text('Copied!').addClass('btn-success').removeClass('btn-outline-secondary');
+    setTimeout(() => {
+      $(this).text('Copy Details').removeClass('btn-success').addClass('btn-outline-secondary');
+    }, 1200);
+  });
+});
+
 // Get Balance
 $('#get-balance-btn').click(function() {
   showSpinner('#balance-spinner');
