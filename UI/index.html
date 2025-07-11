@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Octra Wallet API Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <nav class="navbar navbar-dark bg-dark mb-4">
+    <div class="container-fluid">
+      <span class="navbar-brand mb-0 h1">Octra Wallet API Dashboard</span>
+    </div>
+  </nav>
+
+  <div class="container">
+    <!-- Get Balance -->
+    <div class="card section-card api-section">
+      <div class="card-header">Get Balance</div>
+      <div class="card-body">
+        <button class="btn btn-primary" id="get-balance-btn">Get Balance</button>
+        <span class="spinner" id="balance-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+        <div class="result-area mt-2">
+          <div class="alert d-none" role="alert" id="balance-alert"></div>
+          <pre class="result-pre d-none" id="balance-pre"><code class="json"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Send Transaction -->
+    <div class="card section-card api-section">
+      <div class="card-header">Send Transaction</div>
+      <div class="card-body">
+        <input type="text" class="form-control mb-2" id="send-to" placeholder="Recipient Address">
+        <input type="number" class="form-control mb-2" id="send-amount" placeholder="Amount">
+        <input type="text" class="form-control mb-2" id="send-msg" placeholder="Message (optional)">
+        <button class="btn btn-success" id="send-tx-btn">Send</button>
+        <span class="spinner" id="send-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+        <div class="result-area mt-2">
+          <div class="alert d-none" role="alert" id="send-alert"></div>
+          <pre class="result-pre d-none" id="send-pre"><code class="json"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Multi Send -->
+    <div class="card section-card api-section">
+      <div class="card-header">Multi Send</div>
+      <div class="card-body">
+        <div id="multi-send-list"></div>
+        <div class="row g-2 mb-2">
+          <div class="col-md-5"><input type="text" class="form-control" id="multi-to" placeholder="Recipient Address"></div>
+          <div class="col-md-5"><input type="number" class="form-control" id="multi-amount" placeholder="Amount"></div>
+          <div class="col-md-2"><button class="btn btn-secondary w-100" id="add-multi-btn">Add</button></div>
+        </div>
+        <button class="btn btn-success" id="multi-send-btn">Send All</button>
+        <span class="spinner" id="multi-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+        <div class="result-area mt-2">
+          <div class="alert d-none" role="alert" id="multi-alert"></div>
+          <pre class="result-pre d-none" id="multi-pre"><code class="json"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Encrypt Balance -->
+    <div class="card section-card api-section">
+      <div class="card-header">Encrypt Balance</div>
+      <div class="card-body">
+        <input type="number" class="form-control mb-2" id="encrypt-amount" placeholder="Amount to Encrypt">
+        <button class="btn btn-warning" id="encrypt-btn">Encrypt</button>
+        <span class="spinner" id="encrypt-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+        <div class="result-area mt-2">
+          <div class="alert d-none" role="alert" id="encrypt-alert"></div>
+          <pre class="result-pre d-none" id="encrypt-pre"><code class="json"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Decrypt Balance -->
+    <div class="card section-card api-section">
+      <div class="card-header">Decrypt Balance</div>
+      <div class="card-body">
+        <input type="number" class="form-control mb-2" id="decrypt-amount" placeholder="Amount to Decrypt">
+        <button class="btn btn-warning" id="decrypt-btn">Decrypt</button>
+        <span class="spinner" id="decrypt-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+        <div class="result-area mt-2">
+          <div class="alert d-none" role="alert" id="decrypt-alert"></div>
+          <pre class="result-pre d-none" id="decrypt-pre"><code class="json"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Private Transfer -->
+    <div class="card section-card api-section">
+      <div class="card-header">Private Transfer</div>
+      <div class="card-body">
+        <input type="text" class="form-control mb-2" id="private-to" placeholder="Recipient Address">
+        <input type="number" class="form-control mb-2" id="private-amount" placeholder="Amount">
+        <button class="btn btn-info" id="private-btn">Send Private</button>
+        <span class="spinner" id="private-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+        <div class="result-area mt-2">
+          <div class="alert d-none" role="alert" id="private-alert"></div>
+          <pre class="result-pre d-none" id="private-pre"><code class="json"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Claim Transfer -->
+    <div class="card section-card api-section">
+      <div class="card-header">Claim Private Transfer</div>
+      <div class="card-body">
+        <input type="number" class="form-control mb-2" id="claim-id" placeholder="Transfer ID">
+        <button class="btn btn-info" id="claim-btn">Claim</button>
+        <span class="spinner" id="claim-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+        <div class="result-area mt-2">
+          <div class="alert d-none" role="alert" id="claim-alert"></div>
+          <pre class="result-pre d-none" id="claim-pre"><code class="json"></code></pre>
+        </div>
+      </div>
+    </div>
+
+    <!-- Export Keys -->
+    <div class="card section-card api-section">
+      <div class="card-header">Export Keys</div>
+      <div class="card-body">
+        <button class="btn btn-danger" id="export-btn">Export Keys</button>
+        <span class="spinner" id="export-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+        <div class="result-area mt-2">
+          <div class="alert d-none" role="alert" id="export-alert"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Wallet Config (GET/POST) -->
+    <div class="card section-card api-section">
+      <div class="card-header">Wallet Config (View/Update)</div>
+      <div class="card-body">
+        <button class="btn btn-secondary mb-2" id="get-wallet-btn">View Wallet Config</button>
+        <button class="btn btn-secondary mb-2" id="get-wallet-priv-btn">View Wallet Config (with Private Key)</button>
+        <div class="row g-2 mb-2">
+          <div class="col-md-4"><input type="text" class="form-control" id="wallet-priv" placeholder="Private Key (optional)"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="wallet-addr" placeholder="Address (optional)"></div>
+          <div class="col-md-4"><input type="text" class="form-control" id="wallet-rpc" placeholder="RPC URL (optional)"></div>
+        </div>
+        <button class="btn btn-primary" id="update-wallet-btn">Update Wallet Config</button>
+        <span class="spinner" id="wallet-spinner"><i class="fas fa-spinner fa-spin"></i></span>
+        <div class="result-area mt-2">
+          <div class="alert d-none" role="alert" id="wallet-alert"></div>
+          <pre class="result-pre d-none" id="wallet-pre"><code class="json"></code></pre>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal for sensitive data -->
+  <div class="modal fade" id="modalSensitive" tabindex="-1" aria-labelledby="modalSensitiveLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalSensitiveLabel">Sensitive Data</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <button class="btn btn-outline-secondary mb-2" id="copy-modal-btn"><i class="fas fa-copy"></i> Copy</button>
+          <pre><code class="json" id="modalSensitiveContent"></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer class="footer mt-5 py-3 bg-light">
+    <div class="container text-center">
+      <span class="text-muted">Octra Wallet API &copy; 2024</span>
+    </div>
+  </footer>
+
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+  <script src="app.js"></script>
+</body>
+</html> 
